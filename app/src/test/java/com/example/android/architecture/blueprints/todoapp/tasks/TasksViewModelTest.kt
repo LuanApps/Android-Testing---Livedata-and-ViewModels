@@ -1,8 +1,6 @@
 package com.example.android.architecture.blueprints.todoapp.tasks
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.android.architecture.blueprints.todoapp.Event
 import com.example.android.architecture.blueprints.todoapp.MainCoroutineRule
 import com.example.android.architecture.blueprints.todoapp.data.Task
@@ -12,13 +10,11 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
+import com.example.android.architecture.blueprints.todoapp.R
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import com.example.android.architecture.blueprints.todoapp.R
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 
 class TasksViewModelTest {
 
@@ -72,6 +68,7 @@ class TasksViewModelTest {
         assertThat(tasksViewModel.tasksAddViewVisible.getOrAwaitValue(), `is`(true))
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun completeTask_dataAndSnackbarUpdated() {
         // Create an active task and add it to the repository.
@@ -81,6 +78,7 @@ class TasksViewModelTest {
         // Mark the task as complete task.
         tasksViewModel.completeTask(task, true)
 
+        mainCoroutineRule.advanceUntilIdle()
         // Verify the task is completed.
         assertThat(tasksRepository.tasksServiceData[task.id]?.isCompleted, `is`(true))
 

@@ -5,15 +5,13 @@ import com.example.android.architecture.blueprints.todoapp.MainCoroutineRule
 import com.example.android.architecture.blueprints.todoapp.data.source.FakeTestRepository
 import com.example.android.architecture.blueprints.todoapp.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.pauseDispatcher
-import kotlinx.coroutines.test.resumeDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.Before
 import org.junit.Rule
-import org.junit.jupiter.api.Test
+import org.junit.Test
 
-@ExperimentalCoroutinesApi
 class StatisticsViewModelTest {
 
     // Executes each task synchronously using Architecture Components.
@@ -39,31 +37,31 @@ class StatisticsViewModelTest {
         statisticsViewModel = StatisticsViewModel(tasksRepository)
     }
 
-    //TODO: Solve this bug:
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun loadTasks_loading() {
 
-//    @Test
-//    fun loadTasks_loading() {
-//        // Pause dispatcher so we can verify initial values
-//        mainCoroutineRule.pauseDispatcher()
-//
-//        // Load the task in the viewmodel
-//        statisticsViewModel.refresh()
-//
-//        // Then progress indicator is shown
-//        assertThat(statisticsViewModel.dataLoading.getOrAwaitValue(), `is`(true))
-//
-//        // Execute pending coroutines actions
-//        mainCoroutineRule.resumeDispatcher()
-//
-//        // Then progress indicator is hidden
-//        assertThat(statisticsViewModel.dataLoading.getOrAwaitValue(), `is`(false))
-//    }
+        // Load the task in the viewmodel
+        statisticsViewModel.refresh()
 
+        // Then progress indicator is shown
+        assertThat(statisticsViewModel.dataLoading.getOrAwaitValue(), `is`(true))
+
+        // Execute pending coroutines actions
+        mainCoroutineRule.testScope.advanceUntilIdle()
+
+        // Then progress indicator is hidden
+        assertThat(statisticsViewModel.dataLoading.getOrAwaitValue(), `is`(false))
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun loadStatisticsWhenTasksAreUnavailable_callErrorToDisplay() {
         // Make the repository return errors.
         tasksRepository.setReturnError(true)
         statisticsViewModel.refresh()
+
+        mainCoroutineRule.advanceUntilIdle()
 
         // Then empty and error are true (which triggers an error message to be shown).
         assertThat(statisticsViewModel.empty.getOrAwaitValue(), `is`(true))
